@@ -56,7 +56,7 @@ $(TARGET_PATH)/dump_igvm$(EXE): $(API_DIR)/sample/dump_igvm.c $(API_DIR)/include
 	$(CC) $(CFLAGS) -I $(API_DIR) -o $@ $< $(IGVM_LIBS) $(LDFLAGS)
 
 $(TARGET_PATH)/igvm_test$(EXE): $(API_DIR)/tests/igvm_test.c $(API_DIR)/include/igvm.h $(LIBIGVM)
-	$(CC) $(CFLAGS) -I $(API_DIR) -o $@ $< -lcunit $(IGVM_LIBS_STATIC) $(LDFLAGS)
+	$(CC) $(CFLAGS) -I $(API_DIR) -o $@ $< -I/opt/homebrew/Cellar/cunit/2.1-3/include -L/opt/homebrew/Cellar/cunit/2.1-3/lib -lcunit $(IGVM_LIBS_STATIC) $(LDFLAGS)
 
 $(TARGET_PATH)/igvm.bin: $(TARGET_PATH)/test_data$(EXE)
 	$(TARGET_PATH)/test_data$(EXE) $(TARGET_PATH)/igvm.bin
