@@ -12,7 +12,7 @@ EXE =
 PREFIX ?= /usr
 DESTDIR ?=
 
-CFLAGS ?= -g3 -O0
+CFLAGS ?= -g3 -O0 -Wall -Wextra
 
 CARGO=CARGO_TARGET_DIR=$(IGVM_DIR)/$(TARGET_DIR) cargo
 CARGO_BUILD_HOST := $(shell $(CARGO) -Vv | sed -n 's,^host: ,,p')
@@ -30,7 +30,7 @@ IGVM_LIBS = $(shell pkg-config --libs --static $(UNINSTALLED_PC))
 IGVM_LIBS_STATIC = $(subst $(IGVM_LIBS), -ligvm, $(LIBIGVM))
 
 # Determine igvm crate version from Cargo.toml
-VERSION = $(shell grep -oP "(?<=version = \").+(?=\")" $(IGVM_DIR)/igvm/Cargo.toml)
+VERSION = $(shell sed -n 's/^version = "\(.*\)"/\1/p' $(IGVM_DIR)/igvm/Cargo.toml)
 
 .PHONY: all build test clean install
 
@@ -38,7 +38,7 @@ all: build test
 
 build: $(API_DIR)/include/igvm.h $(TARGET_PATH)/dump_igvm$(EXE)
 
-$(LIBIGVM):
+$(LIBIGVM): $(API_DIR)/include/igvm.h
 	$(CARGO) cbuild --prefix $(PREFIX) --features $(FEATURES) $(EXTRA_PARAMS) --manifest-path=$(IGVM_DIR)/igvm/Cargo.toml
 
 $(TARGET_PATH)/libigvm_defs.rlib:
@@ -71,8 +71,6 @@ clean:
 	rm -f $(API_DIR)/include/igvm.h $(API_DIR)/include/igvm_defs.h $(TARGET_PATH)/dump_igvm$(EXE) $(TARGET_PATH)/test_data$(EXE) $(TARGET_PATH)/igvm.bin
 
 install: build
-	mkdir -p $(DESTDIR)/$(PREFIX)/include/igvm
-	install -m 644 $(IGVM_DIR)/igvm_c/include/* $(DESTDIR)/$(PREFIX)/include/igvm
 	$(CARGO) cinstall $(if $(DESTDIR), --destdir "$(DESTDIR)") --prefix "$(PREFIX)" --features $(FEATURES) $(EXTRA_PARAMS) --manifest-path=$(IGVM_DIR)/igvm/Cargo.toml
 	mkdir -p $(DESTDIR)/$(PREFIX)/bin/
 	install -m 755 $(TARGET_PATH)/dump_igvm$(EXE) $(DESTDIR)/$(PREFIX)/bin/
